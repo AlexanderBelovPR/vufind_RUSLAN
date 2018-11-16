@@ -1,0 +1,57 @@
+import org.marc4j.marc.Record;
+import org.marc4j.marc.ControlField;
+import org.marc4j.marc.DataField;
+import org.solrmarc.index.SolrIndexer;
+
+public Set getFormat(Record record){
+    Set result = new LinkedHashSet();
+    String leader = record.getLeader().toString();
+    char leaderBit6; char leaderBit7; char leaderBit8;
+    ControlField fixedField = (ControlField) record.getVariableField("008");
+    DataField title = (DataField) record.getVariableField("245");
+	String val = SolrIndexer.getFirstFieldVal(record, "105a(4-7)");
+	String db = SolrIndexer.getFirstFieldVal(record, "001");
+    String formatString;
+	
+	if (val == null) { val = "00000"; }
+
+	leaderBit0 = leader.charAt(0);
+	leaderBit4 = leader.charAt(4);
+	leaderBit6 = leader.charAt(6);
+	leaderBit7 = leader.charAt(7);
+	leaderBit8 = leader.charAt(8);
+	
+	switch (Character.toUpperCase(leaderBit6)) {
+		case 'A':
+			switch (Character.toUpperCase(leaderBit7)) {
+				case 'A': 
+					result.add("article"); 
+				break;
+				case 'S':
+					if (Character.toUpperCase(leaderBit8) == '1') { result.add("journal"); }
+					if (Character.toUpperCase(leaderBit8) == '2') { result.add("journal_issue"); }
+				break;
+				case 'M':
+					if (Character.toUpperCase(leaderBit8) == ' ') { if (leaderBit0 == 'd' || leaderBit4 == 'd' ) { result.add("thesis_abstract"); } else {  result.add("book");} }
+					if (Character.toUpperCase(leaderBit8) == '0') { if (leaderBit0 == 'd' || leaderBit4 == 'd' ) { result.add("thesis_abstract"); } else {  result.add("book");} }
+					if (Character.toUpperCase(leaderBit8) == '1') { result.add("book_main"); }
+					if (Character.toUpperCase(leaderBit8) == '2') { result.add("book_volume"); }
+				break;
+			}
+		break;
+		case 'B': if (leaderBit0 == 'm' || leaderBit4 == 'm') { result.add("thesis"); } else { result.add("manuscript"); } break;
+		case 'C': 
+		case 'D': result.add("partiture"); break;
+		case 'E': result.add("map"); break;
+		case 'F': result.add("map"); break;
+		case 'G': result.add("video"); break;
+		case 'I': result.add("audio"); break;
+		case 'J': result.add("audio"); break;
+		case 'K': result.add("photo"); break;
+		case 'L': result.add("ebook"); break;
+		case 'R': result.add("model"); break;
+		case 'Z': result.add("ebook"); break;
+	}		
+		
+	return result;
+}

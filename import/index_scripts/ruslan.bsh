@@ -1,0 +1,335 @@
+/**
+ * Custom date script.
+ *
+ * This can be used to override built-in SolrMarc custom functions.  If you change
+ * this script, you will need to activate it in import/marc_local.properties before
+ * it will be applied during indexing.
+ */
+ 
+import org.marc4j.marc.Record;
+import org.marc4j.marc.ControlField;
+import org.marc4j.marc.DataField;
+import org.solrmarc.index.SolrIndexer;
+import java.util.regex.Pattern;
+import java.util.Arrays;
+import java.nio.charset.StandardCharsets;
+import javax.servlet;
+import java.nio.charset.StandardCharsets.*;
+import java.lang.String;
+
+StandardCharsets.UTF_8;
+
+public String cleanidR(Record record) {
+        return(cleanidR(record, "001"));
+}
+
+public String cleanidR(Record record, String fieldSpec) {
+    String val = SolrIndexer.getFirstFieldVal(record, fieldSpec);
+	String vala = val.replaceAll("\\\\", "");
+    return vala;
+}
+
+public String getCollection(Record record) {
+        return(getCollection(record, "001"));
+}
+
+public String getCollection(Record record, String fieldSpec) {
+    String val = SolrIndexer.getFirstFieldVal(record, fieldSpec);
+    String id = val.replaceAll("\\\\", "");
+	
+	boolean isBooks = id.startsWith("RUPSTUbooks");
+	boolean isSeria = id.startsWith("RUPSTUser");
+	boolean isTrudi = id.startsWith("RUPSTUtrud");
+	boolean isElib  = id.startsWith("RUPNRPUelib");
+	boolean isUrait  = id.startsWith("RUURAIT");
+	boolean isLan  = id.startsWith("RULAN");
+	boolean isBC  = id.startsWith("RUBC");
+	
+	if (isBooks) { return "основной фонд"; }
+	if (isSeria) { return "журналы и газеты"; }
+	if (isTrudi) { return "труды университета"; }
+	if (isElib) { return "электронная библиотека"; }
+	if (isUrait) { return "издания ЭБС Юрайт"; }
+	if (isLan) { return "издания ЭБС Лань"; }
+	if (isBC) { return "издания ЭБС IPRbooks"; }
+
+}
+
+public String cleanidR461(Record record) {
+        return(cleanidR461(record, "461(1)"));
+}
+
+public String cleanidR461(Record record, String fieldSpec) {
+	DataField title = (DataField) record.getVariableField("461");
+	if (title != null) {
+    String val = SolrIndexer.getFirstFieldVal(record, "461(1)");
+	if (val == null) { 
+		String isF = SolrIndexer.getFirstFieldVal(record, "999");
+		if (isF == null) { 
+		String valT = SolrIndexer.getFirstFieldVal(record, "001");
+		return valT.replaceAll("\\\\", "");	
+		} else { return null; }
+	} else {
+	String val = val.replaceAll("\\\\", "");
+	String[] ary = val.split(" ");
+   	return ary[0].replaceFirst("001", "");
+	}
+	} else { return null; }
+}
+
+public String cleanidR461ID(Record record) {
+        return(cleanidR461ID(record, "461(1)"));
+}
+
+public String cleanidR461ID(Record record, String fieldSpec) {
+    DataField title = (DataField) record.getVariableField("461");
+	if (title != null) {
+	String val = SolrIndexer.getFirstFieldVal(record, "461(1)");
+	if (val == null) {
+			String isF = SolrIndexer.getFirstFieldVal(record, "999");
+		if (isF == null) { 
+		String valT = SolrIndexer.getFirstFieldVal(record, "001");
+		return "{{{_ID_}}}"+valT.replaceAll("\\\\", "");	
+		} else { return null; }
+	} else {
+	String val = val.replaceAll("\\\\", "");
+	String[] ary = val.split(" ");
+   	return "{{{_ID_}}}"+ary[0].replaceAll("001", "");
+	}
+	} else { return null; }
+}
+
+public String getLC(Record record) {
+        return(getLC(record, "999h"));
+}
+
+public String getLC(Record record, String fieldSpec) {
+	String res;
+	
+	String[] lc01 = {"001"};
+	String[] lc02 = {"002"};
+	String[] lc03 = {"01", "02"};
+	String[] lc02 = {"002"};
+	String[] lc04 = {"03"};
+	String[] lc05 = {"1", "1М", "1МИ", "1МИ7", "1Ф", "16", "3К"};
+	String[] lc06 = {"15"};
+	String[] lc07 = {"2"};
+	String[] lc08 = {"3", "301", "31", "312"};
+	String[] lc09 = {"33", "33С", "331", "336", "338", "338Т8", "33И", "33М"};
+	String[] lc10 = {"32", "32С", "32И", "327", "3К1", "3К2", "3К4", "3К5", "3КП", "3КИ", "3КМ", "3КСМ"};
+	String[] lc11 = {"34", "34И"};
+	String[] lc12 = {"355"};
+	String[] lc13 = {"37", "378"};
+	String[] lc14 = {"4", "4Р", "4И"};
+	String[] lc15 = {"5"};
+	String[] lc16 = {"51", "510", "511", "512", "514", "515", "517", "519"};
+	String[] lc17 = {"52", "528"};
+	String[] lc18 = {"53", "530.1"};
+	String[] lc19 = {"531"};
+	String[] lc20 = {"532"};
+	String[] lc21 = {"533"};
+	String[] lc22 = {"534"};
+	String[] lc23 = {"535"};
+	String[] lc24 = {"536"};
+	String[] lc25 = {"537"};
+	String[] lc26 = {"538"};
+	String[] lc27 = {"539"};
+	String[] lc28 = {"54", "541", "542", "543", "544", "546", "547", "548", "549"};
+	String[] lc29 = {"55", "550.8", "551", "551.49", "551.5", "551.7", "551.8", "552", "553"};
+	String[] lc30 = {"56"};
+	String[] lc31 = {"57", "58", "59"};
+	String[] lc32 = {"61", "628.74"};
+	String[] lc33 = {"62", "62-135", "62-5", "62-8", "62.08", "620.1", "620.9", "621", "621.01", "621.03", "621.039", "621.1", "621.22"};
+	String[] lc34 = {"621.3", "621.31", "621.311", "621.312", "621.313", "621.314", "621.315", "621.316", "621.317", "621.32", "621.33", "621.35", "621.36"};
+	String[] lc35 = {"621.37", "621.38", "621.39", "621.396", "621.397", "621.398"};
+	String[] lc36 = {"621.4", "621.43"};
+	String[] lc37 = {"621.5"};
+	String[] lc38 = {"621.6"};
+	String[] lc39 = {"621.7", "621.73", "621.74", "621.75"};
+	String[] lc40 = {"621.762"};
+	String[] lc41 = {"621.77", "621.771", "621.78"};
+	String[] lc42 = {"621.79", "621.791"};
+	String[] lc43 = {"621.82", "621.83", "621.85", "621.86", "621.865", "621.88", "621.89"};
+	String[] lc44 = {"621.9", "621.91", "621.92"};
+	String[] lc45 = {"622", "622:621.3", "622.1", "622.2", "622.22", "622.23", "622.233", "622.235", "622.24", "622.25", "622.27", "622.271", "622.272", "622.28", "622.3", "622.32", "622.33", "622.333", "622.34", "622.35", "622.36", "622.4", "622.5", "622.6", "622.67", "622.7", "622.8"};
+	String[] lc46 = {"624", "624.04", "624.1", "624.13", "624.15", "624.2/.8", "69", "69.002.5", "69.03", "69.05", "691", "692", "692.6", "693", "696", "697"};
+	String[] lc47 = {"625"};
+	String[] lc48 = {"626", "627"};
+	String[] lc49 = {"628", "628.9"};
+	String[] lc50 = {"629.1", "629.113", "629.12", "629.7", "629.78"};
+	String[] lc51 = {"63"};
+	String[] lc52 = {"64"};
+	String[] lc53 = {"65"};
+	String[] lc54 = {"656", "656.13"};
+	String[] lc55 = {"658", "658.5"};
+	String[] lc56 = {"66", "66.02", "661", "662", "662.6", "665", "666",  "666.9", "667"};
+	String[] lc57 = {"663"};
+	String[] lc58 = {"669", "669.01", "669.1", "669.2"};
+	String[] lc59 = {"67", "674", "676", "677", "68"};
+	String[] lc60 = {"678"};
+	String[] lc61 = {"681", "681.1", "681.2"};
+	String[] lc62 = {"681.3"};
+	String[] lc63 = {"681.4"};
+	String[] lc64 = {"681.5", "681.51", "681.52"};
+	String[] lc65 = {"7"};
+	String[] lc66 = {"7А"};
+	String[] lc67 = {"71", "72"};
+	String[] lc68 = {"73", "74", "744", "75", "76"};
+	String[] lc69 = {"77", "78", "79", "792", "793"};
+	String[] lc70 = {"8", "8А", "8Р", "8Р1", "8Р2", "8И", "8С*"};
+	String[] lc71 = {"9", "9И"};
+	String[] lc72 = {"902.6", "91"};
+	String[] lc73 = {"Ф", "РФ", "СФ", "С", "А", "И", "Р", "Р1", "Р2", "СБ", "Cб"};
+
+			String lcval = SolrIndexer.getFirstFieldVal(record, fieldSpec);
+			
+			if (lcval != null) {
+			lcval.toUpperCase();
+for (int i = 0; i < lc01.length; i++) { if (lcval.startsWith(lc01[i])) { res = "1"; } }
+for (int i = 0; i < lc02.length; i++) { if (lcval.startsWith(lc02[i])) { res = "2"; } }
+for (int i = 0; i < lc03.length; i++) { if (lcval.startsWith(lc03[i])) { res = "3"; } }
+for (int i = 0; i < lc04.length; i++) { if (lcval.startsWith(lc04[i])) { res = "4"; } }
+for (int i = 0; i < lc05.length; i++) { if (lcval.startsWith(lc05[i])) { res = "5"; } }
+for (int i = 0; i < lc06.length; i++) { if (lcval.startsWith(lc06[i])) { res = "6"; } }
+for (int i = 0; i < lc07.length; i++) { if (lcval.startsWith(lc07[i])) { res = "7"; } }
+for (int i = 0; i < lc08.length; i++) { if (lcval.startsWith(lc08[i])) { res = "8"; } }
+for (int i = 0; i < lc09.length; i++) { if (lcval.startsWith(lc09[i])) { res = "9"; } }
+for (int i = 0; i < lc10.length; i++) { if (lcval.startsWith(lc10[i])) { res = "10"; } }
+for (int i = 0; i < lc11.length; i++) { if (lcval.startsWith(lc11[i])) { res = "11"; } }
+for (int i = 0; i < lc12.length; i++) { if (lcval.startsWith(lc12[i])) { res = "12"; } }
+for (int i = 0; i < lc13.length; i++) { if (lcval.startsWith(lc13[i])) { res = "13"; } }
+for (int i = 0; i < lc14.length; i++) { if (lcval.startsWith(lc14[i])) { res = "14"; } }
+for (int i = 0; i < lc15.length; i++) { if (lcval.startsWith(lc15[i])) { res = "15"; } }
+for (int i = 0; i < lc16.length; i++) { if (lcval.startsWith(lc16[i])) { res = "16"; } }
+for (int i = 0; i < lc17.length; i++) { if (lcval.startsWith(lc17[i])) { res = "17"; } }
+for (int i = 0; i < lc18.length; i++) { if (lcval.startsWith(lc18[i])) { res = "18"; } }
+for (int i = 0; i < lc19.length; i++) { if (lcval.startsWith(lc19[i])) { res = "19"; } }
+for (int i = 0; i < lc20.length; i++) { if (lcval.startsWith(lc20[i])) { res = "20"; } }
+for (int i = 0; i < lc21.length; i++) { if (lcval.startsWith(lc21[i])) { res = "21"; } }
+for (int i = 0; i < lc22.length; i++) { if (lcval.startsWith(lc22[i])) { res = "22"; } }
+for (int i = 0; i < lc23.length; i++) { if (lcval.startsWith(lc23[i])) { res = "23"; } }
+for (int i = 0; i < lc24.length; i++) { if (lcval.startsWith(lc24[i])) { res = "24"; } }
+for (int i = 0; i < lc25.length; i++) { if (lcval.startsWith(lc25[i])) { res = "25"; } }
+for (int i = 0; i < lc26.length; i++) { if (lcval.startsWith(lc26[i])) { res = "26"; } }
+for (int i = 0; i < lc27.length; i++) { if (lcval.startsWith(lc27[i])) { res = "27"; } }
+for (int i = 0; i < lc28.length; i++) { if (lcval.startsWith(lc28[i])) { res = "28"; } }
+for (int i = 0; i < lc29.length; i++) { if (lcval.startsWith(lc29[i])) { res = "29"; } }
+for (int i = 0; i < lc30.length; i++) { if (lcval.startsWith(lc30[i])) { res = "30"; } }
+for (int i = 0; i < lc31.length; i++) { if (lcval.startsWith(lc31[i])) { res = "31"; } }
+for (int i = 0; i < lc32.length; i++) { if (lcval.startsWith(lc32[i])) { res = "32"; } }
+for (int i = 0; i < lc33.length; i++) { if (lcval.startsWith(lc33[i])) { res = "33"; } }
+for (int i = 0; i < lc34.length; i++) { if (lcval.startsWith(lc34[i])) { res = "34"; } }
+for (int i = 0; i < lc35.length; i++) { if (lcval.startsWith(lc35[i])) { res = "35"; } }
+for (int i = 0; i < lc36.length; i++) { if (lcval.startsWith(lc36[i])) { res = "36"; } }
+for (int i = 0; i < lc37.length; i++) { if (lcval.startsWith(lc37[i])) { res = "37"; } }
+for (int i = 0; i < lc38.length; i++) { if (lcval.startsWith(lc38[i])) { res = "38"; } }
+for (int i = 0; i < lc39.length; i++) { if (lcval.startsWith(lc39[i])) { res = "39"; } }
+for (int i = 0; i < lc40.length; i++) { if (lcval.startsWith(lc40[i])) { res = "40"; } }
+for (int i = 0; i < lc41.length; i++) { if (lcval.startsWith(lc41[i])) { res = "41"; } }
+for (int i = 0; i < lc42.length; i++) { if (lcval.startsWith(lc42[i])) { res = "42"; } }
+for (int i = 0; i < lc43.length; i++) { if (lcval.startsWith(lc43[i])) { res = "43"; } }
+for (int i = 0; i < lc44.length; i++) { if (lcval.startsWith(lc44[i])) { res = "44"; } }
+for (int i = 0; i < lc45.length; i++) { if (lcval.startsWith(lc45[i])) { res = "45"; } }
+for (int i = 0; i < lc46.length; i++) { if (lcval.startsWith(lc46[i])) { res = "46"; } }
+for (int i = 0; i < lc47.length; i++) { if (lcval.startsWith(lc47[i])) { res = "47"; } }
+for (int i = 0; i < lc48.length; i++) { if (lcval.startsWith(lc48[i])) { res = "48"; } }
+for (int i = 0; i < lc49.length; i++) { if (lcval.startsWith(lc49[i])) { res = "49"; } }
+for (int i = 0; i < lc50.length; i++) { if (lcval.startsWith(lc50[i])) { res = "50"; } }
+for (int i = 0; i < lc51.length; i++) { if (lcval.startsWith(lc51[i])) { res = "51"; } }
+for (int i = 0; i < lc52.length; i++) { if (lcval.startsWith(lc52[i])) { res = "52"; } }
+for (int i = 0; i < lc53.length; i++) { if (lcval.startsWith(lc53[i])) { res = "53"; } }
+for (int i = 0; i < lc54.length; i++) { if (lcval.startsWith(lc54[i])) { res = "54"; } }
+for (int i = 0; i < lc55.length; i++) { if (lcval.startsWith(lc55[i])) { res = "55"; } }
+for (int i = 0; i < lc56.length; i++) { if (lcval.startsWith(lc56[i])) { res = "56"; } }
+for (int i = 0; i < lc57.length; i++) { if (lcval.startsWith(lc57[i])) { res = "57"; } }
+for (int i = 0; i < lc58.length; i++) { if (lcval.startsWith(lc58[i])) { res = "58"; } }
+for (int i = 0; i < lc59.length; i++) { if (lcval.startsWith(lc59[i])) { res = "59"; } }
+for (int i = 0; i < lc60.length; i++) { if (lcval.startsWith(lc60[i])) { res = "60"; } }
+for (int i = 0; i < lc61.length; i++) { if (lcval.startsWith(lc61[i])) { res = "61"; } }
+for (int i = 0; i < lc62.length; i++) { if (lcval.startsWith(lc62[i])) { res = "62"; } }
+for (int i = 0; i < lc63.length; i++) { if (lcval.startsWith(lc63[i])) { res = "63"; } }
+for (int i = 0; i < lc64.length; i++) { if (lcval.startsWith(lc64[i])) { res = "64"; } }
+for (int i = 0; i < lc65.length; i++) { if (lcval.startsWith(lc65[i])) { res = "65"; } }
+for (int i = 0; i < lc66.length; i++) { if (lcval.startsWith(lc66[i])) { res = "66"; } }
+for (int i = 0; i < lc67.length; i++) { if (lcval.startsWith(lc67[i])) { res = "67"; } }
+for (int i = 0; i < lc68.length; i++) { if (lcval.startsWith(lc68[i])) { res = "68"; } }
+for (int i = 0; i < lc69.length; i++) { if (lcval.startsWith(lc69[i])) { res = "69"; } }
+for (int i = 0; i < lc70.length; i++) { if (lcval.startsWith(lc70[i])) { res = "70"; } }
+for (int i = 0; i < lc71.length; i++) { if (lcval.startsWith(lc71[i])) { res = "71"; } }
+for (int i = 0; i < lc72.length; i++) { if (lcval.startsWith(lc72[i])) { res = "72"; } }
+for (int i = 0; i < lc73.length; i++) { if (lcval.startsWith(lc73[i])) { res = "73"; } }
+
+			
+			if (res == null) { res = "0"; }
+			
+			} else { res = "0"; }
+			
+			return res;
+	}
+
+public String getDate(Record record) {
+        return(getDate(record, "210d"));
+}
+
+public String getDate(Record record, String fieldSpec) {
+			String date210 	= SolrIndexer.getFirstFieldVal(record, "210d");
+			String date100 	= SolrIndexer.getFirstFieldVal(record, "100a");
+			
+			if (date210 != null) { 
+				return date210;
+			} else {
+				if (date100 != null) {
+					return date100.substring(9,13);
+				} else {
+					return null;
+				}
+			}
+}
+
+public String getGenre(Record record) {
+        return(getGenre(record, "105a[4-7]"));
+}
+
+public String getGenre(Record record, String fieldSpec) {
+	String genre = SolrIndexer.getFirstFieldVal(record, "105a[4-7]");
+	String res;
+	
+	if (genre != null) { 
+		char[] gen = genre.toCharArray();
+			genre.trim();
+			if (genre.charAt(0) == '7') { res = "академический труд"; }
+			if (genre.charAt(0) == 'a') { res = "библиографическое издание"; }
+			if (genre.charAt(0) == 'b') { res = "каталог"; }
+			if (genre.charAt(0) == 'c') { res = "указатель"; }
+			if (genre.charAt(0) == 'd') { res = "реферат или резюме"; }
+			if (genre.charAt(0) == 'e') { res = "словарь"; }
+			if (genre.charAt(0) == 'f') { res = "энциклопедия"; }
+			if (genre.charAt(0) == 'g') { res = "справочное издание"; }
+			if (genre.charAt(0) == 'h') { res = "описание проекта"; }
+			if (genre.charAt(0) == 'i') { res = "статистика"; }
+			if (genre.charAt(0) == 'j') { res = "учебное издание"; }
+			if (genre.charAt(0) == 'k') { res = "патентный документ"; }
+			if (genre.charAt(0) == 'l') { res = "стандарт"; }
+			if (genre.charAt(0) == 'm') { res = "диссертация или курсовая работа"; }
+			if (genre.charAt(0) == 'n') { res = "законы и законодательные акты"; }
+			if (genre.charAt(0) == 'o') { res = "цифровые таблицы"; }
+			if (genre.charAt(0) == 'p') { res = "технический отчет"; }
+			if (genre.charAt(0) == 'q') { res = "экзаменационный лист"; }
+			if (genre.charAt(0) == 'r') { res = "литературный обзор"; }
+			if (genre.charAt(0) == 's') { res = "договоры"; }
+			if (genre.charAt(0) == 't') { res = "карикатуры или комиксы"; }
+			if (genre.charAt(0) == 'z') { res = "не установлен"; } 
+		
+	} else { res = "не указан";}
+	if (res == null) { res = "смешанный"; }
+	return res;
+}
+
+public String getTitle463(Record record) {
+        return(getTitle463(record, "461(1)"));
+}
+
+public String getTitle463(Record record, String fieldSpec) {
+	String val = SolrIndexer.getFirstFieldVal(record, "463(1)");
+	return val;
+}
